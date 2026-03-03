@@ -17,13 +17,13 @@ The core layer that stores and organizes all information.
   * **Project Link:** https://github.com/SabrinaCatpenter/ai-glossary-zh
 
 ### 2. Update Pipeline
-An automated, continuous ingestion pipeline that feeds new knowledge into the foundation.
+An automated, continuous ingestion pipeline that feeds new knowledge into the foundation. Highly optimized for cost-effectiveness.
 * **Ingestion Sources:**
-  * Reddit
-  * X (formerly Twitter)
-  * YouTube
-  * New AI Conversations
-These sources constantly update the AI Dictionary and the Knowledge Graph, ensuring the knowledge base remains current.
+  * **Reddit:** Utilizing `PRAW` (Python Reddit API Wrapper) for inexpensive/free metadata and comment extraction.
+  * **X (formerly Twitter):** Utilizing third-party scrapers (e.g., Apify Tweets-X-Scraper or open-source libraries) to bypass prohibitive official API costs via scheduled batch runs.
+  * **YouTube:** Utilizing `youtube-transcript-api` and LangChain's `YoutubeLoader` to extract chunked textual transcripts directly, negating the need for expensive video processing.
+  * **New AI Conversations:** Utilizing community parsing scripts (e.g., `slyubarskiy/chatgpt-conversation-extractor` and `claude-conversation-extractor`) to parse heavy, complex JSON exports into clean Markdown for indexing.
+These sources utilize a lightweight Python ETL workflow (e.g., `dlt` or serverless cron jobs) to constantly update the AI Dictionary and the Knowledge Graph, ensuring the knowledge base remains current.
 
 ### 3. Skills - Tools Layer
 The active layer where the AI connects to various tools to perform tasks based on the knowledge base.
