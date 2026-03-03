@@ -9,11 +9,13 @@ The architecture is divided into the following key layers, from the foundation u
 ### 1. Knowledge Base - Foundation
 The core layer that stores and organizes all information.
 * **Articles:** The base knowledge consisting of cleaned data from over 4000+ ChatGPT conversations.
-* **Knowledge Graph (Concept Relations):** Organizes the articles by clarifying the relationships and structures between different concepts.
-* **AI Dictionary (Entity Terms / ai-glossary-zh):** A byproduct created while building the Knowledge Graph. It serves as an extracted bilingual (Chinese-English) list of key AI concepts and technical terms. Initially extracted from 924 AI-related articles using LLM (GPT-4o-mini) filtering, it holds over 265 structured entries categorized into types (concept, company, product, framework, platform). It is used for:
+* **Knowledge Graph (Concept Relations):** Organizes the articles by clarifying the relationships and structures between different concepts. Powered by **LlamaIndex** as the primary orchestration engine for GraphRAG and indexing.
+* **AI Dictionary (Entity Terms / ai-glossary-zh):** A byproduct created while building the Knowledge Graph. It serves as an extracted bilingual (Chinese-English) list of key AI concepts and technical terms. Initially extracted from 924 AI-related articles using LLM (GPT-4o-mini) filtering, it holds over 265 structured entries categorized into types (concept, company, product, framework, platform). Integrated via LlamaIndex for:
   * **Chinese Word Segmentation:** Fully compatible with the `jieba` tokenization format via `dict.txt`.
   * **Term Normalization:** Merges multiple aliases and Chinese translations (e.g., "向量嵌入", "嵌入") into canonical English terms (e.g., "embedding") via `glossary.json`.
   * **Translation Reference:** Provides standardized terminology for text parsing and downstream RAG indexing.
+  * **Project Link:** https://github.com/SabrinaCatpenter/ai-glossary-zh
+
 ### 2. Update Pipeline
 An automated, continuous ingestion pipeline that feeds new knowledge into the foundation.
 * **Ingestion Sources:**
