@@ -10,8 +10,10 @@ The architecture is divided into the following key layers, from the foundation u
 The core layer that stores and organizes all information.
 * **Articles:** The base knowledge consisting of cleaned data from over 4000+ ChatGPT conversations.
 * **Knowledge Graph (Concept Relations):** Organizes the articles by clarifying the relationships and structures between different concepts.
-* **AI Dictionary (Entity Terms):** A byproduct created while building the Knowledge Graph. It serves as an extracted list of key AI concepts and technical terms with their contexts and explanations. It is compatible with the Jieba tokenization format, making it easy to plug into existing pipelines.
-
+* **AI Dictionary (Entity Terms / ai-glossary-zh):** A byproduct created while building the Knowledge Graph. It serves as an extracted bilingual (Chinese-English) list of key AI concepts and technical terms. Initially extracted from 924 AI-related articles using LLM (GPT-4o-mini) filtering, it holds over 265 structured entries categorized into types (concept, company, product, framework, platform). It is used for:
+  * **Chinese Word Segmentation:** Fully compatible with the `jieba` tokenization format via `dict.txt`.
+  * **Term Normalization:** Merges multiple aliases and Chinese translations (e.g., "向量嵌入", "嵌入") into canonical English terms (e.g., "embedding") via `glossary.json`.
+  * **Translation Reference:** Provides standardized terminology for text parsing and downstream RAG indexing.
 ### 2. Update Pipeline
 An automated, continuous ingestion pipeline that feeds new knowledge into the foundation.
 * **Ingestion Sources:**
