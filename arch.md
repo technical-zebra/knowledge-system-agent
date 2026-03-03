@@ -29,6 +29,7 @@ The active layer where the AI connects to various tools to perform tasks based o
 * **LinkedIn:** Automated LinkedIn post creation.
 * **Blog/SEO:** SEO-friendly blog post generation.
 * **Claude Code SDK:** Integrated via OpenClaw as a specialized AI coding skill. This delegates complex coding, refactoring, and tool-calling workflows directly to the Claude Code CLI, significantly saving token costs and leveraging Claude's native plugins (workflows) and terminal capabilities.
+* **oh-my-opencode:** A productivity framework and plugin ecosystem for managing AI coding environments and workflows.
 * *Extensible:* Capable of connecting with any custom skills to boost productivity.
 
 ### 4. Remote Access Layer
