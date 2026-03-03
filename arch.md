@@ -35,10 +35,11 @@ The active layer where the AI connects to various tools to perform tasks based o
 * **Claude Code SDK (via Agent SDK):** The full Claude Code capability packaged as a programmable library by Anthropic. Core architecture:
   * **Agent Loop:** Claude auto-reasons → calls tools → observes results → continues reasoning, all within a single local process.
   * **Built-in Tools:** File read/write (`Read`, `Edit`, `Write`), Bash command execution (`Bash`), code search (`Glob`, `Grep`) — all available out-of-the-box.
-  * **Session Management:** Each chat maps to an independent Agent Session via `chat_id`. Sessions support `resume: sessionId` for multi-turn context continuity.
+  * **Session Management:** Each chat maps to an independent Agent Session via `chat_id`. Sessions support `resume: sessionId` for multi-turn context continuity. Each session carries a `permissionMode` (controls tool execution safety level, switchable via `/mode` command) and a `busy` flag to prevent concurrent Agent calls on the same chat.
   * **Non-Isolation Mode:** By configuring `settingSources: ["user", "project", "local"]`, the SDK loads `.CLAUDE.md` project instructions, `.claude/settings.json` MCP Server configs, and `.claude/skills/` custom skills — inheriting the full Claude Code ecosystem.
+  * **Async Fire-and-Forget Execution:** Bot message handlers return immediately; Agent runs asynchronously with timeout protection (`AbortController` + `QUERY_TIMEOUT_MS`). Results are pushed back to the chat upon completion. This avoids messaging platform timeout limits (e.g., Feishu WebSocket constraints).
   * **Streaming Output:** Real-time `onUpdate` callbacks push Agent progress incrementally (file reads, command executions, reasoning steps) instead of waiting for full completion.
-  * **Session Persistence:** All sessions serialized to a local JSON file (`.bot-sessions.json`), surviving bot restarts. Sessions include `sessionId`, `label` (first 30 chars of prompt), and `lastUsed` timestamp.
+  * **Session Persistence:** All sessions serialized to a local JSON file (`.bot-sessions.json`), surviving bot restarts. Sessions include `sessionId`, `label` (first 30 chars of prompt), and `lastUsed` timestamp. Writes are triggered only on state changes (`runAgent` completion, `/reset`, `/new`, `/sessions` switch, `/mode` toggle) — read operations never write to disk.
   * **Environment Config:** Requires explicit model variables (`ANTHROPIC_MODEL`, `ANTHROPIC_SMALL_FAST_MODEL`, etc.) when using third-party API endpoints. `env` must spread `process.env` to avoid losing system PATH.
 * **oh-my-opencode:** A productivity framework and plugin ecosystem for managing AI coding environments and workflows.
 * *Extensible:* Capable of connecting with any custom skills to boost productivity.
@@ -54,8 +55,19 @@ The outermost layer that provides the user interface for interacting with the AI
   * `[Natural Language]`: Standard conversational mode for querying the local memory and LlamaIndex knowledge base.
 * **Discord:** Connected via OpenClaw, allowing you to access and call the entire AI system remotely from anywhere using Discord.
 * **Feishu (Lark):** Primary mobile remote access platform, connected via OpenClaw with adapter pattern. Key capabilities:
-  * **Streaming Output:** Agent progress is pushed in real-time via Feishu interactive card `message.patch` — each step (file reads, command runs, reasoning) updates the card in-place.
+  * **Streaming Output:** Agent progress is pushed in real-time via Feishu interactive card `message.patch` (`sendCard` / `patchCard` wrappers over `client.im.message.patch`) — each step updates the card in-place.
   * **Markdown Rendering:** All Agent output rendered via Feishu card `tag: "markdown"` elements, providing proper code blocks, bold/italic formatting, and clickable links.
   * **Session Switching:** `/sessions` displays a card list of all persisted sessions; user replies with a number to switch (using `awaitingSwitch` state pattern, no HTTP callback server needed).
   * **Menu Support:** Feishu bot menu configured for quick command access (`/new`, `/sessions`, `/reset`, `/mode`).
   * **Architecture:** WebSocket long-poll mode (no server required), adapter pattern enables shared Agent core with minimal platform-specific code (~250 lines).
+
+### 5. Codebase Module Structure
+The system follows an **adapter pattern** — a shared Agent core handles all reasoning / session logic, while platform-specific adapters handle messaging I/O. Adding a new platform only requires a new adapter file.
+
+| Module | Responsibility |
+|---|---|
+| `config.ts` | Constants (`SESSION_FILE`, `WORK_DIR`, API keys, timeouts) |
+| `store.ts` | JSON read/write utilities (`loadJson` / `saveJson`) |
+| `agent.ts` | Core Agent logic: `runAgent`, session CRUD, persistence, `onUpdate` streaming (~170 lines) |
+| `adapters/feishu.ts` | Feishu adapter: card rendering, streaming patch, session UI, menu (~250 lines) |
+| `index.ts` | Entry point, `initSessions()` bootstrap |
